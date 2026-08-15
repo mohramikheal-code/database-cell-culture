@@ -1,0 +1,192 @@
+{% include "header.html" %}
+
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<style>
+  .modal-content {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 15px 20px;
+  }
+  .modal-title {
+    color: #34d399 !important;
+    font-weight: 700;
+  }
+  .modal-body label {
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                <h2 style="margin: 0;">Cryostock Inventory</h2>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="input-group" style="width: 250px;">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                        <input type="text" id="cryostockSearchInput" class="form-control" placeholder="Search cryostocks...">
+                    </div>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addStockModal">
+                        <span class="glyphicon glyphicon-plus"></span> Register Cryostock
+                    </button>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <table class="table table-striped" id="cryostocksTable">
+                <thead>
+                    <tr>
+                        <th>Stock ID</th>
+                        <th>Vial Count</th>
+                        <th>Freezer Location</th>
+                        <th>Freeze Date</th>
+                        <th>Cell Line Name</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in cryostocks %}
+                    <tr>
+                        <td>{{ row.0 }}</td>
+                        <td>{{ row.1 }}</td>
+                        <td>{{ row.2 }}</td>
+                        <td>{{ row.3 }}</td>
+                        <td>{{ row.5 if row.5 else 'N/A' }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-xs" data-toggle="modal" data-target="#editStockModal{{ row.0 }}">Edit</button>
+                            <a href="/cryostock/delete/{{ row.0 }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete this cryostock record?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Modals Rendered Outside Table -->
+    {% for row in cryostocks %}
+    <div id="editStockModal{{ row.0 }}" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Edit Cryostock Record (ID: {{ row.0 }})</h4>
+                </div>
+                <form action="{{ url_for('cryostock_update') }}" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="StockID" value="{{ row.0 }}">
+                        
+                        <div class="form-group">
+                            <label>Vial Count:</label>
+                            <input type="number" class="form-control" name="VialCount" value="{{ row.1 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Freezer Location:</label>
+                            <input type="text" class="form-control" name="FreezerLocation" value="{{ row.2 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Freeze Date:</label>
+                            <input type="date" class="form-control" name="FreezeDate" value="{{ row.3 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cell Line:</label>
+                            <select class="form-control" name="CellLineID" required>
+                                {% for cl in cell_lines %}
+                                <option value="{{ cl.0 }}" {% if cl.0 == row.4 %}selected{% endif %}>
+                                    {{ cl.1 }} (ID: {{ cl.0 }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Add Modal -->
+    <div id="addStockModal" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Register Cryostock Sample</h4>
+                </div>
+                <form action="{{ url_for('cryostock_insert') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Stock ID:</label>
+                            <input type="number" class="form-control" name="StockID" required placeholder="e.g. 901">
+                        </div>
+                        <div class="form-group">
+                            <label>Vial Count:</label>
+                            <input type="number" class="form-control" name="VialCount" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Freezer Location:</label>
+                            <input type="text" class="form-control" name="FreezerLocation" placeholder="e.g. Freezer-01 Rack-B" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Freeze Date:</label>
+                            <input type="date" class="form-control" name="FreezeDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cell Line:</label>
+                            <select class="form-control" name="CellLineID" required>
+                                <option value="" disabled selected>Select Cell Line...</option>
+                                {% for cl in cell_lines %}
+                                <option value="{{ cl.0 }}">{{ cl.1 }} (ID: {{ cl.0 }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="submit">Register Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script>
+    $(document).ready(function(){
+        $("#cryostockSearchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#cryostocksTable tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>

@@ -1,0 +1,160 @@
+<style>
+  /* 1. Vibrant Emerald & Deep Slate Background */
+  body {
+    background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.25), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.2), transparent 40%),
+                linear-gradient(135deg, #090d16 0%, #0f172a 50%, #172554 100%) !important;
+    background-attachment: fixed !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  /* 2. Floating Futuristic Navigation Bar */
+  .navbar-custom {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+    margin-bottom: 35px;
+    border-radius: 50px !important; /* Floating Pill Style */
+    padding: 6px 20px;
+  }
+
+  /* Brand Styling */
+  .navbar-custom .navbar-brand {
+    color: #34d399 !important;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .navbar-custom .navbar-brand:hover {
+    color: #6ee7b7 !important;
+  }
+
+  /* Pill Navigation Buttons */
+  .navbar-custom .nav > li > a {
+    color: #94a3b8 !important;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    margin: 4px 4px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .navbar-custom .nav > li > a:hover {
+    background: rgba(52, 211, 153, 0.1) !important;
+    color: #34d399 !important;
+  }
+
+  /* Glowing Emerald Active Tab */
+  .navbar-custom .nav > li.active > a,
+  .navbar-custom .nav > li.active > a:hover,
+  .navbar-custom .nav > li.active > a:focus {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    border-radius: 20px;
+  }
+
+  /* 3. Dark Glassmorphism Container Card */
+  .container .row > div {
+    background: rgba(15, 23, 42, 0.82) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    margin-bottom: 40px;
+    color: #f8fafc;
+  }
+
+  /* 4. Dark Table Styling Overhaul */
+  .table {
+    color: #cbd5e1 !important;
+    background-color: transparent !important;
+  }
+
+  .table > thead > tr > th {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: #34d399;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+  }
+
+  .table-striped > tbody > tr:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .table > tbody > tr > td {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    vertical-align: middle !important;
+  }
+
+  /* Page Headers */
+  h2 {
+    color: #f8fafc;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  /* Form Control Dark Mode */
+  .form-control {
+    background-color: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #f8fafc !important;
+    border-radius: 8px;
+  }
+
+  .form-control:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3) !important;
+  }
+
+  .input-group-addon {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #94a3b8 !important;
+  }
+</style>
+
+<nav class="navbar navbar-default navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ url_for('researchers') }}">
+        <span class="glyphicon glyphicon-leaf"></span> CellCulture DB
+      </a>
+    </div>
+
+    <ul class="nav navbar-nav">
+      <li class="{% if request.endpoint == 'researchers' %}active{% endif %}">
+        <a href="{{ url_for('researchers') }}"><span class="glyphicon glyphicon-user"></span> Researchers</a>
+      </li>
+      <li class="{% if request.endpoint == 'cell_lines' %}active{% endif %}">
+        <a href="{{ url_for('cell_lines') }}"><span class="glyphicon glyphicon-filter"></span> Cell Lines</a>
+      </li>
+      <li class="{% if request.endpoint == 'experiments' %}active{% endif %}">
+        <a href="{{ url_for('experiments') }}"><span class="glyphicon glyphicon-tasks"></span> Experiments</a>
+      </li>
+      <li class="{% if request.endpoint == 'cryostocks' %}active{% endif %}">
+        <a href="{{ url_for('cryostocks') }}"><span class="glyphicon glyphicon-compressed"></span> Cryostocks</a>
+      </li>
+    </ul>
+  </div>
+</nav>

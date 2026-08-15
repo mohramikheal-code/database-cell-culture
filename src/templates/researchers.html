@@ -1,0 +1,188 @@
+{% include "header.html" %}
+
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<style>
+  /* Modal Styling */
+  .modal-content {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  }
+
+  .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 15px 20px;
+  }
+
+  .modal-title {
+    color: #34d399 !important;
+    font-weight: 700;
+  }
+
+  .modal-body label {
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                <h2 style="margin: 0;">Lab Researchers</h2>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="input-group" style="width: 250px;">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                        <input type="text" id="researcherSearchInput" class="form-control" placeholder="Search researchers...">
+                    </div>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addResearcherModal">
+                        <span class="glyphicon glyphicon-plus"></span> Register Researcher
+                    </button>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Clean Table Structure -->
+            <table class="table table-striped" id="researchersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email Address</th>
+                        <th>Office Phone</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in researchers %}
+                    <tr>
+                        <td>{{ row.0 }}</td>
+                        <td>{{ row.1 }}</td>
+                        <td>{{ row.2 }}</td>
+                        <td>{{ row.3 }}</td>
+                        <td>{{ row.4 }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-xs" data-toggle="modal" data-target="#editResearcherModal{{ row.0 }}">Edit</button>
+                            <a href="/researcher/delete/{{ row.0 }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete researcher profile?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Modals Rendered Outside Table -->
+    {% for row in researchers %}
+    <div id="editResearcherModal{{ row.0 }}" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Edit Researcher Profile (ID: {{ row.0 }})</h4>
+                </div>
+                <form action="{{ url_for('researcher_update') }}" method="POST">
+                    <div class="modal-body">
+                        <!-- Primary Key Sent Hidden -->
+                        <input type="hidden" name="ResearcherID" value="{{ row.0 }}">
+                        
+                        <div class="form-group">
+                            <label>First Name:</label>
+                            <input type="text" class="form-control" name="FirstName" value="{{ row.1 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name:</label>
+                            <input type="text" class="form-control" name="LastName" value="{{ row.2 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address:</label>
+                            <input type="email" class="form-control" name="EmailAddress" value="{{ row.3 }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Office Phone:</label>
+                            <input type="text" class="form-control" name="OfficePhone" value="{{ row.4 }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Add Modal -->
+    <div id="addResearcherModal" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Register New Researcher</h4>
+                </div>
+                <form action="{{ url_for('researcher_insert') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Researcher ID:</label>
+                            <input type="number" class="form-control" name="ResearcherID" required placeholder="e.g. 11">
+                        </div>
+                        <div class="form-group">
+                            <label>First Name:</label>
+                            <input type="text" class="form-control" name="FirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name:</label>
+                            <input type="text" class="form-control" name="LastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address:</label>
+                            <input type="email" class="form-control" name="EmailAddress">
+                        </div>
+                        <div class="form-group">
+                            <label>Office Phone:</label>
+                            <input type="text" class="form-control" name="OfficePhone">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="submit">Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script>
+    $(document).ready(function(){
+        $("#researcherSearchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#researchersTable tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>

@@ -1,0 +1,181 @@
+{% include "header.html" %}
+
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<style>
+  .modal-content {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 15px 20px;
+  }
+  .modal-title {
+    color: #34d399 !important;
+    font-weight: 700;
+  }
+  .modal-body label {
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                <h2 style="margin: 0;">Cell Lines Registry</h2>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="input-group" style="width: 250px;">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                        <input type="text" id="cellLineSearchInput" class="form-control" placeholder="Search cell lines...">
+                    </div>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addCellLineModal">
+                        <span class="glyphicon glyphicon-plus"></span> Add Cell Line
+                    </button>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <table class="table table-striped" id="cellLinesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Line Name</th>
+                        <th>Organism</th>
+                        <th>Tissue Origin</th>
+                        <th>Biosafety Level</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in cell_lines %}
+                    <tr>
+                        <td>{{ row.0 }}</td>
+                        <td>{{ row.1 }}</td>
+                        <td>{{ row.2 }}</td>
+                        <td>{{ row.3 }}</td>
+                        <td>{{ row.4 }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-xs" data-toggle="modal" data-target="#editCellLineModal{{ row.0 }}">Edit</button>
+                            <a href="/cell_line/delete/{{ row.0 }}" class="btn btn-danger btn-xs" onclick="return confirm('Delete this cell line?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Modals Rendered Outside Table -->
+    {% for row in cell_lines %}
+    <div id="editCellLineModal{{ row.0 }}" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Edit Cell Line (ID: {{ row.0 }})</h4>
+                </div>
+                <form action="{{ url_for('cell_line_update') }}" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="CellLineID" value="{{ row.0 }}">
+                        
+                        <div class="form-group">
+                            <label>Line Name:</label>
+                            <input type="text" class="form-control" name="LineName" value="{{ row.1 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Organism:</label>
+                            <input type="text" class="form-control" name="Organism" value="{{ row.2 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tissue Origin:</label>
+                            <input type="text" class="form-control" name="TissueOrigin" value="{{ row.3 }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Biosafety Level:</label>
+                            <input type="text" class="form-control" name="BiosafetyLevel" value="{{ row.4 }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Add Modal -->
+    <div id="addCellLineModal" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h4 class="modal-title">Add New Cell Line</h4>
+                </div>
+                <form action="{{ url_for('cell_line_insert') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Cell Line ID:</label>
+                            <input type="number" class="form-control" name="CellLineID" required placeholder="e.g. 101">
+                        </div>
+                        <div class="form-group">
+                            <label>Line Name:</label>
+                            <input type="text" class="form-control" name="LineName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Organism:</label>
+                            <input type="text" class="form-control" name="Organism" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tissue Origin:</label>
+                            <input type="text" class="form-control" name="TissueOrigin">
+                        </div>
+                        <div class="form-group">
+                            <label>Biosafety Level:</label>
+                            <input type="text" class="form-control" name="BiosafetyLevel">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="submit">Add Cell Line</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script>
+    $(document).ready(function(){
+        $("#cellLineSearchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#cellLinesTable tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
